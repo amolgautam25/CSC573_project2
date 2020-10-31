@@ -1,43 +1,23 @@
-def compute_checksum_client(chunk):
-	checksum=0
-	l=len(chunk)
-	chunk=chunk.decode("utf-8")
-	byte=0
-	while byte<l:
-		byte1=ord(str(chunk[byte]))
-		shifted_byte1=byte1<<8
-		if byte+1==l:
-			byte2=0xffff
+def client_checksum(packet,checksum):
+	packet_len = len(packet)
+	packet=packet.decode("utf-8")
+	for i in range(0, packet_len, 2):
+		if i + 1 == packet_len:
+			merged_bytes = (ord(str(packet[i])) << 8) + 0xffff
 		else:
-			byte2=ord(str(chunk[byte+1]))
-		merged_bytes=shifted_byte1+byte2
-		checksum_add=checksum+merged_bytes
-		carryover=checksum_add>>16
-		main_part=checksum_add&0xffff
-		checksum=main_part+carryover
-		byte=byte+2
-	checksum_complement=checksum^0xffff
-	print("client:" , checksum_complement)
-	return checksum_complement
+			merged_bytes = (ord(str(packet[i])) << 8) + ord(str(packet[i + 1]))
+		csum = checksum + merged_bytes
+		checksum = (csum >> 16) + (csum & 0xffff)
+	return checksum ^ 0xffff
 
 
-def compute_checksum_server(chunk,checksum):
-	print("server:" ,checksum)
-	l=len(chunk)
-	byte=0
-	while byte<l:
-		byte1=chunk[byte]
-		shifted_byte1=byte1<<8
-		if byte+1==l:
-			byte2=0xffff
+def server_checksum(packet,checksum):
+	packet_len=len(packet)
+	for i in range(0, packet_len, 2):
+		if i + 1 == packet_len:
+			merged_bytes = (packet[i] << 8) + 0xffff
 		else:
-			byte2=chunk[byte+1]
-		merged_bytes=shifted_byte1+byte2
-		checksum_add=checksum+merged_bytes
-		carryover=checksum_add>>16
-		main_part=checksum_add&0xffff
-		checksum=main_part+carryover
-		byte=byte+2
-	checksum_complement=checksum^0xffff
-
-	return checksum_complement
+			merged_bytes = (packet[i] << 8) + packet[i+1]
+		csum = checksum + merged_bytes
+		checksum = (csum >> 16) + (csum & 0xffff)
+	return checksum^0xffff

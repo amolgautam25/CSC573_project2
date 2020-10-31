@@ -12,7 +12,6 @@ import checksum
 
 
 RTT = 0.1
-
 snum = 0
 last_ack_packet = -1
 last_send_packet = -1
@@ -48,7 +47,7 @@ def timeout_thread(timeout_th, frame):
 def ack_process():
     global last_ack_packet, last_send_packet, client_buffer, sliding_window, client_socket, PORT, HOST, sending_completed, t_end, t_start, t_total
     ack_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    ack_socket.bind(('0.0.0.0', 65009))
+    ack_socket.bind(('0.0.0.0', 65012))
 
     while 1:
         reply = pickle.loads(ack_socket.recv(65535))
@@ -95,7 +94,6 @@ def rdt_send(file_content, client_socket, host, port):
             while y < 100000:
                 y = y + 1
 
-
 sequence_number = 0
 try:
     with open(FILE_NAME, 'rb') as f:
@@ -103,7 +101,7 @@ try:
             chunk = f.read(int(MSS))
             if chunk:
                 snum = sequence_number
-                chunk_checksum = checksum.compute_checksum_client(chunk)
+                chunk_checksum = checksum.client_checksum(chunk, 0)
                 client_buffer[sequence_number] = pickle.dumps([sequence_number, chunk_checksum, "0101010101010101", chunk])
                 sequence_number = sequence_number + 1
             else:
@@ -117,7 +115,6 @@ ack_thread.start()
 rdt_send(client_buffer, client_socket, HOST, PORT)
 while 1:
     if sending_completed:
-        #print("Sending complete------------inside if", sending_completed)
         break
 ack_thread.join()
 client_socket.close()
