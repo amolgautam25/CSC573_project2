@@ -10,8 +10,9 @@ from multiprocessing import Lock
 import time
 import checksum
 
+global client_buffer ,max_seq_number,client_socket,N,PORT,HOST,MSS
 RTT = 0.1
-snum = 0
+max_seq_number = 0
 last_ack_packet = -1
 last_send_packet = -1
 sliding_window = set()
@@ -45,7 +46,7 @@ def timeout_thread(timeout_th, frame):
 def ack_process():
     global last_ack_packet, last_send_packet, client_buffer, sliding_window, client_socket, PORT, HOST, sending_completed, t_end, t_start, t_total
     ack_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    ack_socket.bind(('0.0.0.0', 65012))
+    ack_socket.bind(('0.0.0.0', 65021))
 
     while 1:
         reply = pickle.loads(ack_socket.recv(65535))
@@ -53,7 +54,7 @@ def ack_process():
             current_ack_seq_number = reply[0] - 1
             if last_ack_packet >= -1:
                 thread_lock.acquire()
-            if current_ack_seq_number == snum:
+            if current_ack_seq_number == max_seq_number:
                 eof_packet = pickle.dumps(["0", "0", "1111111111111111", "0"])
                 client_socket.sendto(eof_packet, (HOST, PORT))
                 thread_lock.release()
@@ -69,7 +70,7 @@ def ack_process():
                     sliding_window.remove(last_ack_packet)
                     client_buffer.pop(last_ack_packet)
                     while len(sliding_window) < min(len(client_buffer), N):
-                        if last_send_packet < snum:
+                        if last_send_packet < max_seq_number:
                             client_socket.sendto(client_buffer[last_send_packet + 1], (HOST, PORT))
                             sliding_window.add(last_send_packet + 1)
                             last_send_packet = last_send_packet + 1
@@ -96,10 +97,11 @@ sequence_number = 0
 try:
     with open(filename, 'rb') as f:
         while True:
-            chunk = f.read(int(MSS))
+            chunk = f.read(int(MSS)).decode("utf-8-sig").encode("utf-8")
             if chunk:
-                snum = sequence_number
+                max_seq_number = sequence_number
                 chunk_checksum = checksum.client_checksum(chunk, 0)
+                #print("-------",chunk_checksum)
                 client_buffer[sequence_number] = pickle.dumps([sequence_number, chunk_checksum, "0101010101010101", chunk])
                 sequence_number = sequence_number + 1
             else:

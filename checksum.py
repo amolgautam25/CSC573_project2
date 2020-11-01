@@ -1,6 +1,7 @@
 def client_checksum(packet,checksum):
 	packet_len = len(packet)
 	packet=packet.decode("utf-8")
+	packet_len -= 3
 	for i in range(0, packet_len, 2):
 		if i + 1 == packet_len:
 			merged_bytes = (ord(str(packet[i])) << 8) + 0xffff
@@ -13,6 +14,7 @@ def client_checksum(packet,checksum):
 
 def server_checksum(packet,checksum):
 	packet_len=len(packet)
+	packet_len -= 3
 	for i in range(0, packet_len, 2):
 		if i + 1 == packet_len:
 			merged_bytes = (packet[i] << 8) + 0xffff

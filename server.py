@@ -22,7 +22,7 @@ if os.path.isfile(file_name):
 def send_ack(ack_number):
     ack_packet = pickle.dumps([ack_number, "0000000000000000", "1010101010101010"])
     ack_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    ack_socket.sendto(ack_packet, (ACK_HOST_NAME, 65012))
+    ack_socket.sendto(ack_packet, (ACK_HOST_NAME, 65021))
     ack_socket.close()
 
 
@@ -30,6 +30,7 @@ while 1:
     received_data1, addr = s_socket.recvfrom(65535)
     ACK_HOST_NAME = addr[0]
     data = pickle.loads(received_data1)
+    #print(data)
     if data[2] == "1111111111111111":
         s_socket.close()
         break
