@@ -10,7 +10,6 @@ from multiprocessing import Lock
 import time
 import checksum
 
-
 RTT = 0.1
 snum = 0
 last_ack_packet = -1
@@ -27,10 +26,9 @@ t_end = 0
 
 HOST = sys.argv[1]
 PORT = int(sys.argv[2])
-FILE_NAME = sys.argv[3]
+filename = sys.argv[3]
 N = int(sys.argv[4])
 MSS = int(sys.argv[5])
-
 
 def timeout_thread(timeout_th, frame):
     global last_ack_packet
@@ -80,7 +78,7 @@ def ack_process():
                 thread_lock.release()
     ack_socket.close()
 
-def rdt_send(file_content, client_socket, host, port):
+def rdt_send(client_socket):
     global last_send_packet, last_ack_packet, sliding_window, client_buffer, t_start
     t_start = time.time()
     while len(sliding_window) < min(len(client_buffer), N):
@@ -96,7 +94,7 @@ def rdt_send(file_content, client_socket, host, port):
 
 sequence_number = 0
 try:
-    with open(FILE_NAME, 'rb') as f:
+    with open(filename, 'rb') as f:
         while True:
             chunk = f.read(int(MSS))
             if chunk:
@@ -112,7 +110,7 @@ except:
 signal.signal(signal.SIGALRM, timeout_thread)
 ack_thread = threading.Thread(target=ack_process)
 ack_thread.start()
-rdt_send(client_buffer, client_socket, HOST, PORT)
+rdt_send(client_socket)
 while 1:
     if sending_completed:
         break
