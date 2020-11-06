@@ -31,14 +31,14 @@ while 1:
     ACK_HOST_NAME = addr[0]
     data = pickle.loads(received_data1)
     #print(data)
-    if data[2] == "1111111111111111":
+    if data[2] == "1111111100000000":
         s_socket.close()
         break
     elif data[2] == "0101010101010101":
         if random.random() < loss_prob:
             print("Packet loss, sequence number = " + str(data[0]))
         else:
-            if checksum.server_checksum(data[3], data[1]) == 0:
+            if checksum.client_server_checksum(data[3], data[1]) == 0:
                 if data[0] == last_received_packet + 1:
                     send_ack(data[0] + 1)
                     last_received_packet += 1
