@@ -23,8 +23,8 @@ sliding_window = set()
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 flag = False
 
-t_start = 0
-t_end = 0
+timer_start = 0
+timer_end = 0
 
 HOST = sys.argv[1]
 PORT = int(sys.argv[2])
@@ -47,7 +47,7 @@ def timeout_thread(timeout_th, frame):
 
 
 def ackConn():
-    global final_ack, final_packet, client_buffer, sliding_window, client_socket, PORT, HOST, flag, t_end, t_start, t_total
+    global final_ack, final_packet, client_buffer, sliding_window, client_socket, PORT, HOST, flag, timer_end, timer_start
     ack_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     ack_socket.bind(('0.0.0.0', 65021))
 
@@ -62,9 +62,8 @@ def ackConn():
                 client_socket.sendto(eof_packet, (HOST, PORT))
                 thread_lock.release()
                 flag = True
-                t_end = time.time()
-                t_total = t_end - t_start
-                print("\n--------TOTAL TIME------:", t_total)
+                timer_end = time.time()
+                print("\n--------TOTAL TIME------:", (timer_end - timer_start))
                 break
             elif current_ack_seq_number > final_ack:
                 while final_ack < current_ack_seq_number:
@@ -84,8 +83,8 @@ def ackConn():
     ack_socket.close()
 
 def rdt_send(client_socket):
-    global sliding_window, client_buffer, final_packet, final_ack, t_start
-    t_start = time.time()
+    global sliding_window, client_buffer, final_packet, final_ack, timer_start
+    timer_start = time.time()
     while len(sliding_window) < min(len(client_buffer), N):
         if final_ack == -1:
             client_socket.sendto(client_buffer[final_packet + 1], (HOST, PORT))
