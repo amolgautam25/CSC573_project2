@@ -20,7 +20,6 @@ final_packet = -1
 while 1:
     client_data, server_add = s_socket.recvfrom(65535)
     data = pickle.loads(client_data)
-    #print(data)
     if data[2] == "0101010101010101" and random.random() < loss_prob:
         print("Packet loss, sequence number =", str(data[0]))
     elif data[2] == "0101010101010101":

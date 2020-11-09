@@ -59,7 +59,7 @@ def ack_handler():
                 t_lock.acquire()
             if temp - 1 == max_val:
                 c_socket.sendto(pickle.dumps(["0", "0", "1111111100000000", "0"]), (host, port))
-                #t_lock.release()
+                t_lock.release()
                 flag = True
                 print("\n TOTAL TIME:", ((time.time()) - timer_start))
                 break
@@ -75,9 +75,7 @@ def ack_handler():
                         c_socket.sendto(c_buffer[val], (host, port))
                         window.add(final_packet + 1)
                         final_packet += 1
-                #t_lock.release()
             else:
-                #t_lock.release()
                 pass
             t_lock.release()
     ack.close()
