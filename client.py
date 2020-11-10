@@ -10,7 +10,7 @@ from multiprocessing import Lock
 import time
 import checksum
 
-global N, port, host, MSS, c_buffer ,max_val, c_socket
+#global N, port, host, MSS, c_buffer ,max_val, c_socket
 
 max_val = 0
 final_ack = -1
@@ -58,7 +58,7 @@ def ack_handler():
             if final_ack >= -1:
                 t_lock.acquire()
             if temp - 1 == max_val:
-                c_socket.sendto(pickle.dumps(["0", "0", "1111111100000000", "0"]), (host, port))
+                c_socket.sendto(pickle.dumps(["0", "0", "1111111100000001", "0"]), (host, port))
                 t_lock.release()
                 flag = True
                 print("\n TOTAL TIME:", ((time.time()) - timer_start))

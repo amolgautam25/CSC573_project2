@@ -36,6 +36,6 @@ while 1:
             a_socket.close()
         else:
             print("Packet " + str(data[0]) + " dropped - checksum invalid")
-    elif data[2] == "1111111100000000":
+    elif data[2] == "1111111100000001":
         s_socket.close()
         break
